@@ -37,15 +37,17 @@ impl HandRanking {
             for c in cards.iter() {
                 let cnt_loop = cards
                     .iter()
-                    .filter(|&n| *n.get_value() == *c.get_value())
+                    .filter(|n| n.get_value() == c.get_value())
                     .count();
-                if cnt_loop > cnt {
+                if cnt_loop >= cnt {
                     last_cnt = cnt;
                     cnt = cnt_loop;
                 }
             }
             if (cnt == 2) && (last_cnt == 2) {
                 return HandRanking::TwoPair;
+            } else if (cnt == 2 && last_cnt == 3) || (cnt == 3 && last_cnt == 2) {
+                return HandRanking::FullHouse;
             }
             match cnt {
                 2 => HandRanking::Pair,
@@ -98,17 +100,36 @@ pub fn is_straight(cards_vector: &Vec<Card>) -> bool {
     cards_vals.sort();
     println!("Sorted hand: {:?}", cards_vals);
     let mut cards_vals_iter = cards_vals.iter();
-    let mut last_point_value: i32 = cards_vals_iter.next().unwrap().get_points();
-    if last_point_value == 14 {
-        last_point_value = 1;
-    }
-    for c in cards_vals_iter {
-        if (c.get_points() - 1) != last_point_value {
+    let mut last_point_point: i32 = cards_vals_iter.next().unwrap().get_points();
+    if last_point_point == 14 {
+        if cards_vals_iter.next().unwrap().get_points() == 2 {
+            last_point_point = 2;
+            for c in cards_vals_iter {
+                if (c.get_points() - 1) != last_point_point {
+                    return false;
+                }
+            }
+            return true;
+        } else if cards_vals_iter.next().unwrap().get_points() == 10 {
+            last_point_point = 10;
+            for c in cards_vals_iter {
+                if (c.get_points() - 1) != last_point_point {
+                    return false;
+                }
+            }
+            return true;
+        } else {
             return false;
         }
-        last_point_value = c.get_points();
+    } else {
+        for c in cards_vals_iter {
+            if (c.get_points() - 1) != last_point_point {
+                return false;
+            }
+            last_point_point = c.get_points();
+        }
+        true
     }
-    true
 }
 // fn score(hand: Hand) {
 //     let ranks = "23456789TJQKA";

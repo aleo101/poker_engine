@@ -152,13 +152,15 @@ impl Card {
     pub fn get_value(&self) -> &Value {
         &self.value
     }
-    pub fn from(suit: &str, value: &str) -> Card {
+    pub fn from_names(suit: &str, value: &str) -> Card {
         Card {
             suit: match suit.parse::<Suit>() {
                 Ok(s) => s,
                 Err(e) => panic!("Not a valid suit: {:?}", e),
             },
-            value: value.parse().unwrap(),
+            value: value
+                .parse()
+                .unwrap_or_else(|e| panic!("Not a valid value: {:?}", e)),
         }
     }
     pub fn from_vals(suit: Suit, value: Value) -> Card {
